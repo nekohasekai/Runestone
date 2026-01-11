@@ -163,7 +163,18 @@ final class LineController {
     }
 
     func lineFragmentNode(containingCharacterAt location: Int) -> LineFragmentNode? {
-        lineFragmentTree.node(containingLocation: location)
+        let cappedLocation = min(max(location, 0), line.data.totalLength)
+        if isStringInvalid
+            || isDefaultAttributesInvalid
+            || isTypesetterInvalid
+            || (lineFragmentTree.nodeTotalValue == 0 && line.data.totalLength > 0)
+            || cappedLocation > lineFragmentTree.nodeTotalValue {
+            prepareToDisplayString(toLocation: cappedLocation, syntaxHighlightAsynchronously: false)
+        }
+        guard cappedLocation >= 0 && cappedLocation <= lineFragmentTree.nodeTotalValue else {
+            return nil
+        }
+        return lineFragmentTree.node(containingLocation: cappedLocation)
     }
 
     func lineFragmentNode(atIndex index: Int) -> LineFragmentNode {
